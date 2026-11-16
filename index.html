@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Останній ведмідь</title>
+    <style>
+      html,body{margin:0;height:100%;background:#000;overflow:hidden}
+      canvas{display:block;width:100%;height:100%}
+      #hud{position:fixed;inset:0;pointer-events:none}
+      .hud-hearts{position:absolute;top:16px;left:16px;display:flex;gap:6px}
+      .heart{width:36px;height:36px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.6))}
+      .heart-full path{fill:#ff3b5c;stroke:#ffd0d8;stroke-width:1.2}
+      .heart-empty path{fill:rgba(20,20,30,.55);stroke:#8a8aa8;stroke-width:1.2}
+      .hud-hurt{position:absolute;inset:0;opacity:0;box-shadow:inset 0 0 90px 30px rgba(255,30,40,.85)}
+      #fill{position:fixed;inset:0;pointer-events:none;opacity:0}
+      .screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;font-family:Georgia,'Times New Roman',serif;color:#ffe9c4;text-shadow:0 3px 12px rgba(0,0,0,.7)}
+      .screen[hidden]{display:none}
+      .screen h1{margin:0;font-size:min(9vw,84px);font-weight:normal;letter-spacing:.04em}
+      .splash{background:radial-gradient(circle at 50% 40%,#3a2a55,#0d0d18)}
+      .screen-key{width:120px;height:64px}
+      .the-end{pointer-events:none;background:rgba(40,20,10,.25)}
+      .bubble{position:absolute;width:72px;height:72px;margin:-80px 0 0 -36px;background:#fff;border-radius:50%;box-shadow:0 3px 8px rgba(0,0,0,.45)}
+      .bubble::after{content:'';position:absolute;left:30px;bottom:-10px;border:8px solid transparent;border-top-color:#fff}
+      .bubble svg{width:56px;height:56px;margin:8px}
+      .hud-hint{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;opacity:0}
+    </style>
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+    <div id="hud"></div>
+    <div id="fill"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
