@@ -141,10 +141,18 @@ export function createSimNow(level: Level, tuning: Tuning = TUNING, start: SimSt
   const r = tuning.capsuleRadius;
   const halfCylinder = (tuning.capsuleHeight - 2 * r) / 2;
   const centerOffset = tuning.capsuleHeight / 2; // від підошов до центра капсули
+  /** Зазор, який контролер персонажа тримає між капсулою і землею, м. */
+  const SKIN = 0.01;
+  /**
+   * На місце (старт, Відродження, повернення після падіння, Blink, Рефлекс) її ставимо на стільки вище землі, м.
+   * Рівно впритул до підлоги перший крок контролера Rapier 0.21 бачить «зіткнення» з випадково нахиленою нормаллю:
+   * вона тоне в блок на кілька міліметрів або не рушає з місця. Годиться будь-який зазор від 0.5 мм до `SKIN`.
+   */
+  const START_GAP = 0.001;
   const body = world.createRigidBody(
     rapier.RigidBodyDesc.kinematicPositionBased().setTranslation(
       spawn.x,
-      spawn.y + centerOffset,
+      spawn.y + centerOffset + START_GAP,
       spawn.z,
     ),
   );
@@ -152,7 +160,7 @@ export function createSimNow(level: Level, tuning: Tuning = TUNING, start: SimSt
     rapier.ColliderDesc.capsule(halfCylinder, r).setCollisionGroups(groups(PLAYER_GROUP, ALL_GROUPS)),
     body,
   );
-  const controller = world.createCharacterController(0.01);
+  const controller = world.createCharacterController(SKIN);
   controller.setUp({ x: 0, y: 1, z: 0 });
   controller.enableSnapToGround(0.1);
 
@@ -422,6 +430,25 @@ export function createSimNow(level: Level, tuning: Tuning = TUNING, start: SimSt
    * Обхід вади контролера персонажа в Rapier 0.21: на діагоналі квадратного блока (x - cx = z - cz)
    * він не зупиняє капсулу, і вона тоне в підлогу. Промінь униз від центру капсули повертає її на землю.
    */
+  /**
+   * Центр капсули для підошов у точці `to`: рівно на `START_GAP` над землею під нею. Висоту беремо від землі, а не
+   * від `to.y`: у `to` вже може сидіти зазор попереднього місця, і він накопичувався б із кожним Blink чи поверненням.
+   */
+  function standingCenter(to: Vec3): Vec3 {
+    const up = 0.2;
+    const hit = world.castRay(
+      new rapier.Ray({ x: to.x, y: to.y + up, z: to.z }, { x: 0, y: -1, z: 0 }),
+      up + 0.2,
+      true,
+      undefined,
+      groups(0xffff, SOLID_GROUP | BARS_GROUP),
+      undefined,
+      body,
+    );
+    const ground = hit ? to.y + up - hit.timeOfImpact : to.y;
+    return { x: to.x, y: ground + centerOffset + START_GAP, z: to.z };
+  }
+
   function liftOutOfGround(): void {
     const t = body.translation();
     const hit = world.castRay(
@@ -432,14 +459,14 @@ export function createSimNow(level: Level, tuning: Tuning = TUNING, start: SimSt
       groups(0xffff, SOLID_GROUP | BARS_GROUP),
     );
     if (hit && hit.timeOfImpact < centerOffset - 0.01) {
-      const lift = centerOffset - hit.timeOfImpact;
+      const lift = centerOffset + START_GAP - hit.timeOfImpact;
       body.setTranslation({ x: t.x, y: t.y + lift, z: t.z }, true);
     }
   }
 
   /** Ставить Софійку на місце без наслідків руху: швидкість нуль, стоїть на землі, приземлення не буде. */
   function teleportTo(to: Vec3): void {
-    const center = { x: to.x, y: to.y + centerOffset, z: to.z };
+    const center = standingCenter(to);
     body.setTranslation(center, true);
     body.setNextKinematicTranslation(center);
     world.step(); // колайдер переїжджає лише після кроку світу
@@ -499,7 +526,7 @@ export function createSimNow(level: Level, tuning: Tuning = TUNING, start: SimSt
         const from = { ...sofiyka.position };
         const to = enemy ? resolveReflex(world, rayDown, enemy, from, tuning, sofiyka.facing) : null;
         if (enemy && to) {
-          body.setNextKinematicTranslation({ x: to.x, y: to.y + centerOffset, z: to.z });
+          body.setNextKinematicTranslation(standingCenter(to));
           world.step();
           syncPosition();
           sofiyka.velocityY = 0;
@@ -516,7 +543,7 @@ export function createSimNow(level: Level, tuning: Tuning = TUNING, start: SimSt
         const from = { ...sofiyka.position };
         const to = resolveBlink(world, from, sofiyka.facing, tuning);
         if (to) {
-          body.setNextKinematicTranslation({ x: to.x, y: to.y + centerOffset, z: to.z });
+          body.setNextKinematicTranslation(standingCenter(to));
           world.step();
           syncPosition();
           sofiyka.velocityY = 0;
@@ -599,7 +626,9 @@ export function createSimNow(level: Level, tuning: Tuning = TUNING, start: SimSt
         const current = body.translation();
         controller.computeColliderMovement(collider, {
           x: moveX + carry.x,
-          y: sofiyka.velocityY * dt - (sofiyka.grounded ? 0.01 : 0) + carry.y,
+          // На землі вниз не тиснемо: притискання на 1 см змушувало контролер Rapier 0.21 раз на кілька кроків з'їдати
+          // весь рух по землі (до 8 % швидкості). Сходинку вниз і край тримає `enableSnapToGround`.
+          y: sofiyka.velocityY * dt + carry.y,
           z: moveZ + carry.z,
         });
         const m = controller.computedMovement();

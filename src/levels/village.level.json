@@ -1,0 +1,304 @@
+{
+  "blocks": [
+    {
+      "kind": "solid",
+      "center": {
+        "x": 0.0,
+        "y": -0.5,
+        "z": 0.0
+      },
+      "halfExtents": {
+        "x": 20.0,
+        "y": 0.5,
+        "z": 20.0
+      }
+    },
+    {
+      "kind": "solid",
+      "center": {
+        "x": 0.0,
+        "y": 1.5,
+        "z": 20.25
+      },
+      "halfExtents": {
+        "x": 20.5,
+        "y": 1.5,
+        "z": 0.25
+      }
+    },
+    {
+      "kind": "solid",
+      "center": {
+        "x": 0.0,
+        "y": 1.5,
+        "z": -20.25
+      },
+      "halfExtents": {
+        "x": 20.5,
+        "y": 1.5,
+        "z": 0.25
+      }
+    },
+    {
+      "kind": "solid",
+      "center": {
+        "x": 20.25,
+        "y": 1.5,
+        "z": 0.0
+      },
+      "halfExtents": {
+        "x": 0.25,
+        "y": 1.5,
+        "z": 20.0
+      }
+    },
+    {
+      "kind": "solid",
+      "center": {
+        "x": -20.25,
+        "y": 1.5,
+        "z": 0.0
+      },
+      "halfExtents": {
+        "x": 0.25,
+        "y": 1.5,
+        "z": 20.0
+      }
+    },
+    {
+      "kind": "solid",
+      "center": {
+        "x": -8.0,
+        "y": 1.5,
+        "z": -9.0
+      },
+      "halfExtents": {
+        "x": 2.0,
+        "y": 1.5,
+        "z": 2.0
+      },
+      "look": "house"
+    },
+    {
+      "kind": "solid",
+      "center": {
+        "x": -16.0,
+        "y": 1.5,
+        "z": -15.0
+      },
+      "halfExtents": {
+        "x": 2.0,
+        "y": 1.5,
+        "z": 2.0
+      },
+      "look": "house"
+    },
+    {
+      "kind": "solid",
+      "center": {
+        "x": 16.0,
+        "y": 1.5,
+        "z": 12.0
+      },
+      "halfExtents": {
+        "x": 2.0,
+        "y": 1.5,
+        "z": 2.0
+      },
+      "look": "house"
+    },
+    {
+      "kind": "solid",
+      "center": {
+        "x": -16.0,
+        "y": 1.5,
+        "z": 13.0
+      },
+      "halfExtents": {
+        "x": 2.0,
+        "y": 1.5,
+        "z": 2.0
+      },
+      "look": "house"
+    }
+  ],
+  "spawn": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": -14.0
+  },
+  "killY": -10.0,
+  "enemies": [
+    {
+      "id": "turtle",
+      "kind": "turtle",
+      "position": {
+        "x": -10.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "facing": 1.5707963267948966
+    },
+    {
+      "id": "bee-north",
+      "kind": "bee",
+      "position": {
+        "x": -12.0,
+        "y": 1.5,
+        "z": 5.0
+      },
+      "facing": 1.5707963267948966
+    },
+    {
+      "id": "bee-south",
+      "kind": "bee",
+      "position": {
+        "x": -12.0,
+        "y": 1.5,
+        "z": -5.0
+      },
+      "facing": 1.5707963267948966
+    }
+  ],
+  "cages": [
+    {
+      "id": "cage-1",
+      "position": {
+        "x": -8.0,
+        "y": 0.0,
+        "z": 16.0
+      },
+      "facing": 3.141592653589793,
+      "working": false
+    },
+    {
+      "id": "cage-2",
+      "position": {
+        "x": -4.0,
+        "y": 0.0,
+        "z": 16.0
+      },
+      "facing": 3.141592653589793,
+      "working": false
+    },
+    {
+      "id": "cage-3",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 16.0
+      },
+      "facing": 3.141592653589793,
+      "working": true
+    },
+    {
+      "id": "cage-4",
+      "position": {
+        "x": 4.0,
+        "y": 0.0,
+        "z": 16.0
+      },
+      "facing": 3.141592653589793,
+      "working": false
+    },
+    {
+      "id": "cage-5",
+      "position": {
+        "x": 8.0,
+        "y": 0.0,
+        "z": 16.0
+      },
+      "facing": 3.141592653589793,
+      "working": false
+    }
+  ],
+  "flowers": [
+    {
+      "id": "flower-yellow",
+      "position": {
+        "x": 14.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "color": "yellow",
+      "opens": true,
+      "to": "honeycombs"
+    },
+    {
+      "id": "flower-pink",
+      "position": {
+        "x": 14.0,
+        "y": 0.0,
+        "z": 6.0
+      },
+      "color": "pink",
+      "opens": false
+    },
+    {
+      "id": "flower-blue",
+      "position": {
+        "x": 14.0,
+        "y": 0.0,
+        "z": -6.0
+      },
+      "color": "blue",
+      "opens": false
+    }
+  ],
+  "entries": {
+    "backrooms": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": -14.0
+    },
+    "honeycombs": {
+      "x": 11.0,
+      "y": 0.0,
+      "z": 0.0
+    }
+  },
+  "survivor": {
+    "position": {
+      "x": 2.0,
+      "y": 0.0,
+      "z": -13.5
+    },
+    "facing": 3.141592653589793
+  },
+  "trail": {
+    "flower": [
+      {
+        "x": 1.0,
+        "y": 0.0,
+        "z": -12.0
+      },
+      {
+        "x": 7.0,
+        "y": 0.0,
+        "z": -6.0
+      },
+      {
+        "x": 11.0,
+        "y": 0.0,
+        "z": 0.0
+      }
+    ],
+    "cage": [
+      {
+        "x": 1.0,
+        "y": 0.0,
+        "z": -12.0
+      },
+      {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 12.5
+      }
+    ]
+  }
+}

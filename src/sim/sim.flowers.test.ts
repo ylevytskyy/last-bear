@@ -24,7 +24,9 @@ function walk(sim: Sim, target: Vec3, stop = 0.1): SimEvent[] {
     const p = sim.sofiyka.position;
     const d = Math.hypot(target.x - p.x, target.z - p.z);
     if (d < stop) return events;
-    events.push(...sim.step({ ...NO_INPUT, moveX: (target.x - p.x) / d, moveZ: (target.z - p.z) / d }));
+    // Останній крок — коротший: повним кроком (8 см) вона перестрибувала б точку туди-сюди й ніколи не стала б ближче за `stop`.
+    const pace = Math.min(1, d / (TUNING.walkSpeed * TUNING.step));
+    events.push(...sim.step({ ...NO_INPUT, moveX: ((target.x - p.x) / d) * pace, moveZ: ((target.z - p.z) / d) * pace }));
   }
   throw new Error('never got there');
 }
@@ -110,8 +112,8 @@ describe('a jump into the bud', () => {
   it('standing on the stem and stepping off is not entering the flower', async () => {
     // Невисокий стрибок (нижчий за бутон): зійти на ніжку можна, не перетнувши висоти бутона згори вниз.
     const low: Tuning = { ...TUNING, jumpHeight: 0.9 };
-    const sim = await createSim(LEVEL, low);
-    walk(sim, beside(YELLOW, 1.1));
+    // Старт одразу біля ніжки: місце, де її зупинила б ходьба, залежить від кроку, а стрибок на ребро ніжки — від сантиметрів.
+    const sim = await createSim({ ...LEVEL, spawn: beside(YELLOW, 1.25) }, low);
     steps(sim, 60);
     expect(openness(sim, 'yellow')).toBe(1);
     const events = [...sim.step({ ...JUMP, moveZ: 1 }), ...steps(sim, 9, { ...JUMP, moveZ: 1 }), ...steps(sim, 40, JUMP)];

@@ -10,12 +10,14 @@
 - Тести: `pnpm test`
 - Перевірка типів: `pnpm typecheck`
 - Збірка: `pnpm build`
+- Експорт рівнів із Blender: `pnpm levels` (усі) або `pnpm levels village` (потрібен `blender` у PATH або змінна `BLENDER`)
 
 ## Architecture
 - `src/sim/` — правила гри, крок 1/60 с. Не імпортують `three`, DOM, Web Audio (ADR 0001 у `docs/adr/`).
 - `src/view/` — показ: ведмідь, камера, ефекти, звук. Читає стан із `sim`.
 - `src/entities/` — об'єкти, що малюються (ведмідь).
 - Усі числа налаштувань — у `src/sim/tuning.ts`.
+- Рівні редагуються в Blender: джерело — `levels/<id>.blend`, гра читає експортований `src/levels/<id>.level.json` (руками не правити). Угоди сцени — у шапці `tools/levels/level_to_blend.py`; після зміни `.blend` — `pnpm levels` і `pnpm test`.
 - Терміни — у `CONTEXT.md`; план і специфікація — у `specs/vertical-slice/`.
 - Нова логіка правил: спершу тест у `src/sim/*.test.ts`. Картинка перевіряється кадром із браузера.
 

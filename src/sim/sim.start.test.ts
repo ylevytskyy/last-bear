@@ -139,3 +139,113 @@ describe('SimStart: open cages, hearts and spawn', () => {
     sim.dispose();
   });
 });
+
+describe('the start exactly above the centre of the block she stands on', () => {
+  const floor = (hx: number, hz: number): Block => block(0, -0.5, 0, hx, 0.5, hz);
+  const cases: [string, Block[]][] = [
+    ['one block 4 × 6.9 m', [floor(2, 3.4641)]],
+    ['a hexagon of three nested blocks', [floor(3.5, 0.866), floor(3, 1.7321), floor(2, 3.4641)]],
+    ['a hexagon with a strip 1 m deep', [floor(3.5, 0.5), floor(3, 1.7321), floor(2, 3.4641)]],
+  ];
+  const directions: [number, number][] = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  for (const [name, blocks] of cases) {
+    for (const [moveX, moveZ] of directions) {
+      it(`${name}: a third of a second of walking (${moveX}, ${moveZ}) carries her 1.67 m and never under the floor`, async () => {
+        const sim = await createSim({ blocks, spawn: { x: 0, y: 0, z: 0 }, killY: -10 });
+        let lowest = Infinity;
+        for (let i = 0; i < 20; i++) {
+          sim.step({ ...NO_INPUT, moveX, moveZ });
+          lowest = Math.min(lowest, sim.sofiyka.position.y);
+        }
+        const p = sim.sofiyka.position;
+        // 20 кроків — це 1.67 м (з блока не сходить).
+        expect(p.x * moveX + p.z * moveZ).toBeCloseTo(20 * TUNING.step * TUNING.walkSpeed, 2);
+        expect(lowest).toBeGreaterThan(-0.001);
+        expect(sim.sofiyka.grounded).toBe(true);
+        sim.dispose();
+      });
+    }
+  }
+});
+
+describe('walking on level ground keeps full speed in every direction', () => {
+  /** Детермінований генератор (mulberry32). */
+  function rng(seed: number): () => number {
+    let a = seed;
+    return () => {
+      a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  const floor = (hx: number, hz: number): Block => block(0, -0.5, 0, hx, 0.5, hz);
+  const STEPS = 15; // 1.25 м: зі старту в 0.5 м від центра вона лишається над блоками
+  const grounds: [string, Block[]][] = [
+    ['one block', [floor(3.5, 3.4641)]],
+    ['a hexagon of three nested blocks', [floor(3.5, 0.866), floor(3, 1.7321), floor(2, 3.4641)]],
+  ];
+  for (const [name, blocks] of grounds) {
+    it(`${name}: 60 random starts and directions, ${STEPS} steps each, not one step lost and never under the floor`, async () => {
+      const r = rng(7);
+      const lost: string[] = [];
+      for (let k = 0; k < 60; k++) {
+        // Кожен третій — рівно вздовж осі блока: там контролер губив кроки найчастіше.
+        const angle = k % 3 === 0 ? (Math.floor(r() * 4) * Math.PI) / 2 : r() * Math.PI * 2;
+        const from = k % 3 === 0 ? 0 : r() * 0.5;
+        const turn = r() * Math.PI * 2;
+        const spawn = { x: Math.cos(turn) * from, y: 0, z: Math.sin(turn) * from };
+        const sim = await createSim({ blocks, spawn, killY: -10 });
+        for (let i = 0; i < 30; i++) sim.step(NO_INPUT); // постояти, як гравець на старті
+        const start = { ...sim.sofiyka.position };
+        const moveX = Math.cos(angle);
+        const moveZ = Math.sin(angle);
+        let lowest = Infinity;
+        for (let i = 0; i < STEPS; i++) {
+          sim.step({ ...NO_INPUT, moveX, moveZ });
+          lowest = Math.min(lowest, sim.sofiyka.position.y);
+        }
+        const p = sim.sofiyka.position;
+        const steps = ((p.x - start.x) * moveX + (p.z - start.z) * moveZ) / (TUNING.step * TUNING.walkSpeed);
+        if (steps < STEPS - 0.3 || lowest < -0.001) lost.push(`#${k}: ${steps.toFixed(1)} steps, lowest ${lowest.toFixed(4)}`);
+        sim.dispose();
+      }
+      expect(lost).toEqual([]);
+    });
+  }
+});
+
+describe('being put in place does not lift her a little more each time', () => {
+  const FLAT: Level = { blocks: [block(0, -0.5, 0, 60, 0.5, 60)], spawn: { x: -50, y: 0, z: 0.3 }, killY: -10 };
+
+  it('eight Blinks in a row across level ground: her height after each is the same, within a tenth of a millimetre', async () => {
+    const sim = await createSim(FLAT);
+    const heights: number[] = [];
+    for (let b = 0; b < 8; b++) {
+      for (let i = 0; i < 130; i++) sim.step({ ...NO_INPUT, moveX: i < 20 ? 1 : 0 }); // пройтись і дочекатись перезарядки
+      const events = sim.step({ ...NO_INPUT, blink: true });
+      expect(events.map((e) => e.type)).toContain('blinked');
+      sim.step(NO_INPUT);
+      expect(sim.sofiyka.grounded).toBe(true);
+      heights.push(sim.sofiyka.position.y);
+    }
+    expect(Math.max(...heights) - Math.min(...heights)).toBeLessThan(1e-4);
+    expect(Math.max(...heights)).toBeLessThan(0.005);
+    sim.dispose();
+  });
+
+  it('four falls and returns from the same edge: the place she is returned to stays at the same height', async () => {
+    const sim = await createSim(ISLANDS);
+    const heights: number[] = [];
+    for (let fall = 0; fall < 4; fall++) {
+      let back: Vec3 | null = null;
+      for (let i = 0; i < 600 && !back; i++) {
+        for (const e of sim.step({ ...NO_INPUT, moveX: 1 })) if (e.type === 'returned') back = e.to;
+      }
+      expect(back).not.toBeNull();
+      heights.push(back!.y);
+    }
+    expect(Math.max(...heights) - Math.min(...heights)).toBeLessThan(1e-4);
+    sim.dispose();
+  });
+});
