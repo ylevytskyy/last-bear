@@ -51,12 +51,12 @@ const p0 = hexAt(0, 0, 4); // старт
 const p1 = hexAfter(p0, 2.0, 0, 4); // стрибок через 2 м
 const m1 = moverAfter('mover-1', p1, 0);
 const p2 = hexAt(m1.right - OVERLAP + WIDE * 2, 0, 2); // камінь: з платформи на нього
-const p3 = hexAfter(p2, 3.5, 1.0, 2); // камінь +1 м, подвійний стрибок
+const p3 = hexAfter(p2, 3.0, 1.0, 2); // камінь +1 м, подвійний стрибок
 const m2 = moverAfter('mover-2', p3, 1.0);
 const p4 = hexAt(m2.right - OVERLAP + WIDE * 4.5, 1.0, 4.5); // велика, без Бджіл
-const p5 = hexAfter(p4, 3.5, 1.0, 4.5); // велика, Бджола
-const p6 = hexAfter(p5, 3.5, 1.0, 5.5); // найбільша: Джерело, Бджола
-const p7 = hexAfter(p6, 3.5, 1.0, 4.5); // Квітка, Бджола
+const p5 = hexAfter(p4, 2.5, 1.0, 4.5); // велика, Бджола
+const p6 = hexAfter(p5, 2.5, 1.0, 5.5); // найбільша: Джерело, Бджола
+const p7 = hexAfter(p6, 2.5, 1.0, 4.5); // Квітка, Бджола
 
 const SOURCE_X = p6.cx + 2;
 const STAND_X = SOURCE_X - 2.7; // звідси Удар дістає грані казана; Ключ лягає в 0.9 м попереду
