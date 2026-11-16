@@ -354,6 +354,19 @@ export function createWorldView(
         const picture = bubbleFrame(bubbleFrames(progress), sim.time, TUNING.village.bubbleFrameSeconds);
         bubble.show(at.x, at.y, picture);
         debug['bubble'] = picture;
+      } else if (level.source) {
+        // Стільники: без тексту показуємо, куди йти. Ключ ще в казані/на землі — «ключ» над ним; Ключ у лапах — «квітка» над Квіткою.
+        const flower = level.flowers?.find((f) => f.opensWhen === 'keyHeld');
+        const target = s.keys >= 1 ? flower?.position : (sim.source?.keyAt ?? level.source.position);
+        const picture = s.keys >= 1 ? 'flower' : 'key';
+        if (target && Math.hypot(s.position.x - target.x, s.position.z - target.z) < 14) {
+          const at = toScreen(target.x, target.y + (s.keys >= 1 ? 2.2 : 3.2), target.z);
+          bubble.show(at.x, at.y, picture);
+          debug['bubble'] = picture;
+        } else {
+          bubble.show(0, 0, null);
+          debug['bubble'] = null;
+        }
       } else {
         bubble.show(0, 0, null);
         debug['bubble'] = null;
